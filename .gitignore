@@ -28,12 +28,12 @@ dist-ssr
 .env.local
 .env.development
 .env.production
-.env.example
+
 
 # Environment files
 .env
 .env.local
 .env.*.local
-
+.env.example
 # But keep example file
-!.env.example
+
