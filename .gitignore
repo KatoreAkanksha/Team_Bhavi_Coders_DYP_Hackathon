@@ -6,7 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-.env.example
+
 node_modules
 dist
 dist-ssr
@@ -28,6 +28,7 @@ dist-ssr
 .env.local
 .env.development
 .env.production
+.env.example
 
 # Environment files
 .env
