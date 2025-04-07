@@ -1,45 +1,57 @@
-import React from 'react';
-import { toast } from 'sonner';
+import { Component, ErrorInfo, ReactNode } from "react";
+import { AlertCircle } from "lucide-react";
 
-interface ErrorBoundaryState {
-  hasError: boolean;
+interface Props {
+  children: ReactNode;
+  fallback?: ReactNode;
 }
 
-export class ErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  ErrorBoundaryState
-> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
+interface State {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ErrorBoundary extends Component<Props, State> {
+  public state: State = {
+    hasError: false,
+    error: null,
+  };
+
+  public static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
   }
 
-  static getDerivedStateFromError(_: Error): ErrorBoundaryState {
-    return { hasError: true };
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Uncaught error:", error, errorInfo);
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error:', error, errorInfo);
-    toast.error('Something went wrong');
-  }
-
-  render() {
+  public render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Something went wrong</h2>
-            <button
-              className="text-blue-500 hover:text-blue-700"
-              onClick={() => this.setState({ hasError: false })}
-            >
-              Try again
-            </button>
+        this.props.fallback || (
+          <div className="flex h-screen items-center justify-center">
+            <div className="text-center">
+              <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
+              <h2 className="mt-4 text-xl font-semibold">
+                Something went wrong
+              </h2>
+              <p className="mt-2 text-gray-600">
+                {this.state.error?.message || "An unexpected error occurred"}
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-4 rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
+              >
+                Reload Page
+              </button>
+            </div>
           </div>
-        </div>
+        )
       );
     }
 
     return this.props.children;
   }
-} 
+}
+
+export default ErrorBoundary;

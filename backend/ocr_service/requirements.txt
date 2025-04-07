@@ -1,0 +1,15 @@
+flask==2.3.3
+flask-cors==4.0.0
+flask-limiter==3.5.0
+easyocr==1.7.1
+opencv-python==4.8.0.76
+numpy==1.26.0
+python-dateutil==2.8.2
+Pillow==10.0.1
+langdetect==1.0.9
+pyzbar==0.1.9
+loguru==0.7.2
+python-magic==0.4.27
+python-magic-bin==0.4.14; platform_system == 'Windows'
+gunicorn==21.2.0
+werkzeug==3.0.1 

@@ -1,83 +1,82 @@
-
-import { useState } from "react";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogTrigger 
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { 
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { toast } from "sonner";
-import { Plus } from "lucide-react";
+} from '@/components/ui/select';
+import { toast } from 'sonner';
+import { Plus } from 'lucide-react';
 
 interface AddBudgetModalProps {
   onAddBudget?: (budget: {
     category: string;
     amount: number;
-    period: "weekly" | "monthly" | "yearly";
+    period: 'weekly' | 'monthly' | 'yearly';
   }) => void;
 }
 
 const categoryOptions = [
-  "Food & Dining",
-  "Transportation",
-  "Shopping",
-  "Entertainment",
-  "Bills & Utilities",
-  "Health & Fitness",
-  "Education",
-  "Travel",
-  "Personal Care",
-  "Gifts & Donations",
-  "Investments",
-  "Miscellaneous",
+  'Food & Dining',
+  'Transportation',
+  'Shopping',
+  'Entertainment',
+  'Bills & Utilities',
+  'Health & Fitness',
+  'Education',
+  'Travel',
+  'Personal Care',
+  'Gifts & Donations',
+  'Investments',
+  'Miscellaneous',
 ];
 
 const AddBudgetModal = ({ onAddBudget }: AddBudgetModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [category, setCategory] = useState("");
-  const [amount, setAmount] = useState("");
-  const [period, setPeriod] = useState<"weekly" | "monthly" | "yearly">("monthly");
+  const [category, setCategory] = useState('');
+  const [amount, setAmount] = useState('');
+  const [period, setPeriod] = useState<'weekly' | 'monthly' | 'yearly'>('monthly');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!category || !amount) {
-      toast.error("Please fill in all required fields");
+      toast.error('Please fill in all required fields');
       return;
     }
-    
+
     if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
-      toast.error("Please enter a valid amount");
+      toast.error('Please enter a valid amount');
       return;
     }
-    
+
     onAddBudget?.({
       category,
       amount: parseFloat(amount),
       period,
     });
-    
-    toast.success("Budget added successfully");
+
+    toast.success('Budget added successfully');
     resetForm();
     setIsOpen(false);
   };
-  
+
   const resetForm = () => {
-    setCategory("");
-    setAmount("");
-    setPeriod("monthly");
+    setCategory('');
+    setAmount('');
+    setPeriod('monthly');
   };
 
   return (
@@ -92,7 +91,7 @@ const AddBudgetModal = ({ onAddBudget }: AddBudgetModalProps) => {
         <DialogHeader>
           <DialogTitle>Create New Budget</DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="category">Category *</Label>
@@ -101,7 +100,7 @@ const AddBudgetModal = ({ onAddBudget }: AddBudgetModalProps) => {
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
-                {categoryOptions.map((option) => (
+                {categoryOptions.map(option => (
                   <SelectItem key={option} value={option}>
                     {option}
                   </SelectItem>
@@ -109,12 +108,14 @@ const AddBudgetModal = ({ onAddBudget }: AddBudgetModalProps) => {
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="amount">Budget Amount *</Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  ₹
+                </span>
                 <Input
                   id="amount"
                   type="number"
@@ -122,17 +123,17 @@ const AddBudgetModal = ({ onAddBudget }: AddBudgetModalProps) => {
                   placeholder="0.00"
                   className="pl-8"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={e => setAmount(e.target.value)}
                   required
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="period">Time Period *</Label>
-              <Select 
-                value={period} 
-                onValueChange={(val) => setPeriod(val as "weekly" | "monthly" | "yearly")}
+              <Select
+                value={period}
+                onValueChange={val => setPeriod(val as 'weekly' | 'monthly' | 'yearly')}
               >
                 <SelectTrigger id="period">
                   <SelectValue placeholder="Select period" />
@@ -145,13 +146,9 @@ const AddBudgetModal = ({ onAddBudget }: AddBudgetModalProps) => {
               </Select>
             </div>
           </div>
-          
+
           <DialogFooter className="pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => setIsOpen(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
               Cancel
             </Button>
             <Button type="submit">Create Budget</Button>

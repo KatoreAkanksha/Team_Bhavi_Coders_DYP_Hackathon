@@ -1,12 +1,6 @@
-import { cn } from "@/lib/utils";
-import { 
-  ArrowDown, 
-  ArrowUp, 
-  DollarSign,
-  AlertTriangle, 
-  CheckCircle2
-} from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { cn } from '@/lib/utils';
+import { ArrowDown, ArrowUp, IndianRupee, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { formatIndianCurrency } from '@/utils/currency';
 
 export interface Budget {
@@ -14,7 +8,7 @@ export interface Budget {
   category: string;
   amount: number;
   spent: number;
-  period: "weekly" | "monthly" | "yearly";
+  period: 'weekly' | 'monthly' | 'yearly';
 }
 
 interface BudgetCardProps {
@@ -28,23 +22,18 @@ const BudgetCard = ({ budget, onClick, className }: BudgetCardProps) => {
   const percentSpent = (budget.spent / budget.amount) * 100;
   const isOverBudget = budget.spent > budget.amount;
   const isNearLimit = percentSpent >= 80 && percentSpent < 100;
-  
+
   // Format currency
   const formattedAmount = formatIndianCurrency(budget.amount);
   const formattedSpent = formatIndianCurrency(budget.spent);
-  
+
   const remaining = budget.amount - budget.spent;
-  const formattedRemaining = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(Math.abs(remaining));
+  const formattedRemaining = formatIndianCurrency(Math.abs(remaining));
 
   return (
-    <div 
+    <div
       className={cn(
-        "p-4 rounded-xl border bg-white shadow-subtle card-transition animate-fade-in",
+        'p-4 rounded-xl border bg-white shadow-subtle card-transition animate-fade-in',
         className
       )}
       onClick={onClick}
@@ -55,26 +44,29 @@ const BudgetCard = ({ budget, onClick, className }: BudgetCardProps) => {
           {budget.period}
         </span>
       </div>
-      
+
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center text-sm text-muted-foreground">
-          <DollarSign className="h-4 w-4 mr-1" />
-          <span>Total: <span className="font-medium text-foreground">{formattedAmount}</span></span>
+          <IndianRupee className="h-4 w-4 mr-1" />
+          <span>
+            Total: <span className="font-medium text-foreground">{formattedAmount}</span>
+          </span>
         </div>
         <div className="flex items-center text-sm text-muted-foreground">
-          <span>Spent: <span className="font-medium text-foreground">{formattedSpent}</span></span>
+          <span>
+            Spent: <span className="font-medium text-foreground">{formattedSpent}</span>
+          </span>
         </div>
       </div>
-      
-      <Progress 
-        value={percentSpent > 100 ? 100 : percentSpent} 
-        className={cn("h-2 mb-2", 
-          percentSpent > 90 ? 'bg-red-100' : 
-          percentSpent > 75 ? 'bg-amber-100' : 
-          'bg-green-100'
+
+      <Progress
+        value={percentSpent > 100 ? 100 : percentSpent}
+        className={cn(
+          'h-2 mb-2',
+          percentSpent > 90 ? 'bg-red-100' : percentSpent > 75 ? 'bg-amber-100' : 'bg-green-100'
         )}
       />
-      
+
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           {isOverBudget ? (
@@ -89,7 +81,7 @@ const BudgetCard = ({ budget, onClick, className }: BudgetCardProps) => {
             </div>
           )}
         </div>
-        
+
         {isOverBudget ? (
           <AlertTriangle className="h-4 w-4 text-red-500" />
         ) : isNearLimit ? (

@@ -1,111 +1,100 @@
-import { useState } from "react";
-import BudgetCard from "@/components/BudgetCard";
-import { type Budget } from "@/components/BudgetCard";
-import AddBudgetModal from "@/components/AddBudgetModal";
-import SpendingTrendChart from "@/components/SpendingTrendChart";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { useState } from 'react';
+import BudgetCard from '@/components/BudgetCard';
+import { type Budget } from '@/components/BudgetCard';
+import AddBudgetModal from '@/components/AddBudgetModal';
+import SpendingTrendChart from '@/components/SpendingTrendChart';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { 
-  Plus, 
-  CreditCard, 
-  AlertTriangle, 
-  ArrowUpRight, 
-  Wallet, 
-  TrendingUp, 
-  BellRing, 
+  Plus,
+  CreditCard,
+  AlertTriangle,
+  ArrowUpRight,
+  Wallet,
+  TrendingUp,
+  BellRing,
   XCircle,
   CheckCircle2,
-  InfoIcon
-} from "lucide-react";
-import { v4 as uuidv4 } from "uuid";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+  InfoIcon,
+} from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import { formatIndianCurrency } from '@/utils/currency';
 
 // Mock data for demonstration
 const mockBudgets: Budget[] = [
   {
-    id: "1",
-    category: "Food & Dining",
-    amount: 500,
-    spent: 350,
-    period: "monthly"
+    id: '1',
+    category: 'Food & Dining',
+    amount: 15000,
+    spent: 12500,
+    period: 'monthly',
   },
   {
-    id: "2",
-    category: "Transportation",
-    amount: 300,
-    spent: 220,
-    period: "monthly"
+    id: '2',
+    category: 'Transportation',
+    amount: 8000,
+    spent: 6500,
+    period: 'monthly',
   },
   {
-    id: "3",
-    category: "Entertainment",
-    amount: 200,
-    spent: 180,
-    period: "monthly"
+    id: '3',
+    category: 'Entertainment',
+    amount: 5000,
+    spent: 4200,
+    period: 'monthly',
   },
   {
-    id: "4",
-    category: "Shopping",
-    amount: 400,
-    spent: 420,
-    period: "monthly"
+    id: '4',
+    category: 'Shopping',
+    amount: 10000,
+    spent: 11500,
+    period: 'monthly',
   },
   {
-    id: "5",
-    category: "Bills & Utilities",
-    amount: 800,
-    spent: 750,
-    period: "monthly"
+    id: '5',
+    category: 'Bills & Utilities',
+    amount: 20000,
+    spent: 18500,
+    period: 'monthly',
   },
   {
-    id: "6",
-    category: "Health & Fitness",
-    amount: 250,
-    spent: 180,
-    period: "monthly"
-  }
+    id: '6',
+    category: 'Health & Fitness',
+    amount: 6000,
+    spent: 4800,
+    period: 'monthly',
+  },
 ];
 
 const mockTrendData = [
-  { date: "Jan", amount: 1200, budget: 1500 },
-  { date: "Feb", amount: 1400, budget: 1500 },
-  { date: "Mar", amount: 1300, budget: 1500 },
-  { date: "Apr", amount: 1500, budget: 1500 },
-  { date: "May", amount: 1800, budget: 1500 },
-  { date: "Jun", amount: 1600, budget: 1500 }
+  { date: 'Jan', amount: 45000, budget: 50000 },
+  { date: 'Feb', amount: 48000, budget: 50000 },
+  { date: 'Mar', amount: 47000, budget: 50000 },
+  { date: 'Apr', amount: 51000, budget: 50000 },
+  { date: 'May', amount: 55000, budget: 50000 },
+  { date: 'Jun', amount: 52000, budget: 50000 },
 ];
 
 const mockWeeklyTrendData = [
-  { date: "Mon", amount: 120, budget: 150 },
-  { date: "Tue", amount: 90, budget: 150 },
-  { date: "Wed", amount: 130, budget: 150 },
-  { date: "Thu", amount: 80, budget: 150 },
-  { date: "Fri", amount: 190, budget: 150 },
-  { date: "Sat", amount: 220, budget: 150 },
-  { date: "Sun", amount: 170, budget: 150 }
+  { date: 'Mon', amount: 2500, budget: 3000 },
+  { date: 'Tue', amount: 2000, budget: 3000 },
+  { date: 'Wed', amount: 2800, budget: 3000 },
+  { date: 'Thu', amount: 1800, budget: 3000 },
+  { date: 'Fri', amount: 3500, budget: 3000 },
+  { date: 'Sat', amount: 4000, budget: 3000 },
+  { date: 'Sun', amount: 3200, budget: 3000 },
 ];
 
 const mockYearlyTrendData = [
-  { date: "2023", amount: 15000, budget: 18000 },
-  { date: "2022", amount: 14000, budget: 16000 },
-  { date: "2021", amount: 12500, budget: 15000 },
-  { date: "2020", amount: 11800, budget: 14000 },
-  { date: "2019", amount: 10500, budget: 12000 }
+  { date: '2023', amount: 600000, budget: 650000 },
+  { date: '2022', amount: 550000, budget: 600000 },
+  { date: '2021', amount: 500000, budget: 550000 },
+  { date: '2020', amount: 450000, budget: 500000 },
+  { date: '2019', amount: 400000, budget: 450000 },
 ];
 
 const BudgetPage = () => {
@@ -113,49 +102,50 @@ const BudgetPage = () => {
   const [trendData, setTrendData] = useState(mockTrendData);
   const [weeklyTrendData, setWeeklyTrendData] = useState(mockWeeklyTrendData);
   const [yearlyTrendData, setYearlyTrendData] = useState(mockYearlyTrendData);
-  const [timeRange, setTimeRange] = useState<"week" | "month" | "year">("month");
+  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
 
   const totalBudget = budgets.reduce((sum, budget) => sum + budget.amount, 0);
   const totalSpent = budgets.reduce((sum, budget) => sum + budget.spent, 0);
   const remainingBudget = totalBudget - totalSpent;
   const budgetPercentage = (totalSpent / totalBudget) * 100;
-  
+
   // Use the utility consistently
   const formattedTotalBudget = formatIndianCurrency(totalBudget);
   const formattedTotalSpent = formatIndianCurrency(totalSpent);
-  
   const formattedRemainingBudget = formatIndianCurrency(remainingBudget);
 
   const handleAddBudget = (budget: {
     category: string;
     amount: number;
-    period: "weekly" | "monthly" | "yearly";
+    period: 'weekly' | 'monthly' | 'yearly';
   }) => {
     const newBudget: Budget = {
       id: uuidv4(),
       ...budget,
       spent: 0,
     };
-    
+
     setBudgets([...budgets, newBudget]);
-    toast.success("Budget added successfully!");
+    toast.success('Budget added successfully!');
   };
 
-  const handleTimeRangeChange = (range: "week" | "month" | "year") => {
+  const handleTimeRangeChange = (range: 'week' | 'month' | 'year') => {
     setTimeRange(range);
   };
 
   const getCurrentTrendData = () => {
-    if (timeRange === "week") return weeklyTrendData;
-    if (timeRange === "year") return yearlyTrendData;
+    if (timeRange === 'week') return weeklyTrendData;
+    if (timeRange === 'year') return yearlyTrendData;
     return trendData;
   };
 
   const getBudgetsWithStatus = () => {
-    const onTrack = budgets.filter(budget => (budget.spent / budget.amount) < 0.8);
-    const warning = budgets.filter(budget => (budget.spent / budget.amount) >= 0.8 && (budget.spent / budget.amount) < 1);
+    const onTrack = budgets.filter(budget => budget.spent / budget.amount < 0.8);
+    const warning = budgets.filter(
+      budget => budget.spent / budget.amount >= 0.8 && budget.spent / budget.amount < 1
+    );
     const overBudget = budgets.filter(budget => budget.spent > budget.amount);
-    
+
     return { onTrack, warning, overBudget };
   };
 
@@ -163,7 +153,6 @@ const BudgetPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      
       <main className="pt-6 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <div className="mb-8">
@@ -175,7 +164,7 @@ const BudgetPage = () => {
               <AddBudgetModal onAddBudget={handleAddBudget} />
             </div>
           </div>
-          
+
           <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="animate-fade-in">
               <CardHeader className="pb-2">
@@ -197,8 +186,8 @@ const BudgetPage = () => {
                 </div>
               </CardContent>
             </Card>
-            
-            <Card className="animate-fade-in" style={{ animationDelay: "100ms" }}>
+
+            <Card className="animate-fade-in" style={{ animationDelay: '100ms' }}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg font-semibold">Budget Status</CardTitle>
                 <CardDescription>Current spending vs budget</CardDescription>
@@ -208,27 +197,32 @@ const BudgetPage = () => {
                   <span className="text-3xl font-bold">{formattedTotalSpent}</span>
                   <span className="text-base font-medium">of {formattedTotalBudget}</span>
                 </div>
-                <Progress 
-                  value={budgetPercentage > 100 ? 100 : budgetPercentage} 
-                  className={cn("h-2 mt-2", 
-                    budgetPercentage > 90 ? 'bg-red-100' : 
-                    budgetPercentage > 75 ? 'bg-amber-100' : 
-                    'bg-green-100'
+                <Progress
+                  value={budgetPercentage > 100 ? 100 : budgetPercentage}
+                  className={cn(
+                    'h-2 mt-2',
+                    budgetPercentage > 90
+                      ? 'bg-red-100'
+                      : budgetPercentage > 75
+                        ? 'bg-amber-100'
+                        : 'bg-green-100'
                   )}
                 />
                 <div className="mt-2 flex items-center justify-between text-sm">
                   <span>{budgetPercentage.toFixed(0)}% used</span>
-                  <span className={`font-medium ${
-                    remainingBudget < 0 ? 'text-red-500' : 'text-green-500'
-                  }`}>
+                  <span
+                    className={`font-medium ${
+                      remainingBudget < 0 ? 'text-red-500' : 'text-green-500'
+                    }`}
+                  >
                     {remainingBudget < 0 ? 'Over by ' : 'Remaining: '}
                     {formattedRemainingBudget.replace('-', '')}
                   </span>
                 </div>
               </CardContent>
             </Card>
-            
-            <Card className="animate-fade-in" style={{ animationDelay: "200ms" }}>
+
+            <Card className="animate-fade-in" style={{ animationDelay: '200ms' }}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg font-semibold">Budget Insights</CardTitle>
                 <CardDescription>Quick overview</CardDescription>
@@ -266,22 +260,22 @@ const BudgetPage = () => {
               </CardContent>
             </Card>
           </div>
-          
+
           <div className="mb-8">
-            <SpendingTrendChart 
-              data={getCurrentTrendData()} 
+            <SpendingTrendChart
+              data={getCurrentTrendData()}
               title="Budget vs. Actual Spending"
               timeRange={timeRange}
               onTimeRangeChange={handleTimeRangeChange}
             />
           </div>
-          
+
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold">Your Budgets</h2>
               <AddBudgetModal onAddBudget={handleAddBudget} />
             </div>
-            
+
             <Tabs defaultValue="all">
               <TabsList>
                 <TabsTrigger value="all">Budget</TabsTrigger>
@@ -302,21 +296,19 @@ const BudgetPage = () => {
                   )}
                 </TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="all" className="mt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {budgets.map((budget) => (
+                  {budgets.map(budget => (
                     <BudgetCard key={budget.id} budget={budget} />
                   ))}
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="warning" className="mt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {warning.length > 0 ? (
-                    warning.map((budget) => (
-                      <BudgetCard key={budget.id} budget={budget} />
-                    ))
+                    warning.map(budget => <BudgetCard key={budget.id} budget={budget} />)
                   ) : (
                     <div className="col-span-full flex items-center justify-center py-12 text-center">
                       <div>
@@ -332,13 +324,11 @@ const BudgetPage = () => {
                   )}
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="over" className="mt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {overBudget.length > 0 ? (
-                    overBudget.map((budget) => (
-                      <BudgetCard key={budget.id} budget={budget} />
-                    ))
+                    overBudget.map(budget => <BudgetCard key={budget.id} budget={budget} />)
                   ) : (
                     <div className="col-span-full flex items-center justify-center py-12 text-center">
                       <div>
@@ -356,7 +346,7 @@ const BudgetPage = () => {
               </TabsContent>
             </Tabs>
           </div>
-          
+
           <div className="mt-12 bg-blue-50 rounded-xl p-6 border border-blue-100 animate-fade-in">
             <div className="flex items-start">
               <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-4 flex-shrink-0">
@@ -369,19 +359,29 @@ const BudgetPage = () => {
                 </p>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-start">
-                    <span className="bg-blue-100 text-blue-700 rounded-full h-5 w-5 flex items-center justify-center mr-2 mt-0.5">1</span>
-                    <span>Set realistic budget limits based on your historical spending patterns.</span>
+                    <span className="bg-blue-100 text-blue-700 rounded-full h-5 w-5 flex items-center justify-center mr-2 mt-0.5">
+                      1
+                    </span>
+                    <span>
+                      Set realistic budget limits based on your historical spending patterns.
+                    </span>
                   </li>
                   <li className="flex items-start">
-                    <span className="bg-blue-100 text-blue-700 rounded-full h-5 w-5 flex items-center justify-center mr-2 mt-0.5">2</span>
+                    <span className="bg-blue-100 text-blue-700 rounded-full h-5 w-5 flex items-center justify-center mr-2 mt-0.5">
+                      2
+                    </span>
                     <span>Review your budgets weekly to catch potential overruns early.</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="bg-blue-100 text-blue-700 rounded-full h-5 w-5 flex items-center justify-center mr-2 mt-0.5">3</span>
+                    <span className="bg-blue-100 text-blue-700 rounded-full h-5 w-5 flex items-center justify-center mr-2 mt-0.5">
+                      3
+                    </span>
                     <span>Adjust your budgets as your financial situation changes.</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="bg-blue-100 text-blue-700 rounded-full h-5 w-5 flex items-center justify-center mr-2 mt-0.5">4</span>
+                    <span className="bg-blue-100 text-blue-700 rounded-full h-5 w-5 flex items-center justify-center mr-2 mt-0.5">
+                      4
+                    </span>
                     <span>Use the forecasting feature to anticipate future expenses.</span>
                   </li>
                 </ul>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   LineChart,
   Line,
@@ -9,15 +9,16 @@ import {
   ResponsiveContainer,
   Area,
   AreaChart,
-} from "recharts";
-import { cn } from "@/lib/utils";
+} from 'recharts';
+import { cn } from '@/lib/utils';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
+import { formatIndianCurrency } from '@/utils/currency';
 
 interface DataPoint {
   date: string;
@@ -30,8 +31,8 @@ interface SpendingTrendChartProps {
   className?: string;
   title?: string;
   showBudget?: boolean;
-  timeRange?: "week" | "month" | "year";
-  onTimeRangeChange?: (range: "week" | "month" | "year") => void;
+  timeRange?: 'week' | 'month' | 'year';
+  onTimeRangeChange?: (range: 'week' | 'month' | 'year') => void;
 }
 
 const customTooltip = ({ active, payload, label }: any) => {
@@ -40,17 +41,11 @@ const customTooltip = ({ active, payload, label }: any) => {
       <div className="bg-white p-3 border shadow-md rounded-md">
         <p className="font-medium mb-1">{label}</p>
         <p className="text-primary font-semibold">
-          Spent: {new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-          }).format(payload[0].value)}
+          Spent: {formatIndianCurrency(payload[0].value)}
         </p>
         {payload.length > 1 && payload[1].value && (
           <p className="text-gray-500 font-semibold">
-            Budget: {new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: 'USD',
-            }).format(payload[1].value)}
+            Budget: {formatIndianCurrency(payload[1].value)}
           </p>
         )}
       </div>
@@ -62,9 +57,9 @@ const customTooltip = ({ active, payload, label }: any) => {
 const SpendingTrendChart = ({
   data,
   className,
-  title = "Spending Trend",
+  title = 'Spending Trend',
   showBudget = true,
-  timeRange = "month",
+  timeRange = 'month',
   onTimeRangeChange,
 }: SpendingTrendChartProps) => {
   const [isClient, setIsClient] = useState(false);
@@ -73,17 +68,17 @@ const SpendingTrendChart = ({
 
   useEffect(() => {
     setIsClient(true);
-    
+
     // Animate the data loading
     const timer = setTimeout(() => {
       setChartData(data);
     }, 500);
-    
+
     return () => clearTimeout(timer);
   }, [data]);
 
   const handleTimeRangeChange = (value: string) => {
-    const newRange = value as "week" | "month" | "year";
+    const newRange = value as 'week' | 'month' | 'year';
     setLocalTimeRange(newRange);
     if (onTimeRangeChange) {
       onTimeRangeChange(newRange);
@@ -91,28 +86,20 @@ const SpendingTrendChart = ({
   };
 
   const formatYAxis = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
       notation: 'compact',
       maximumFractionDigits: 0,
     }).format(value);
   };
 
   return (
-    <div
-      className={cn(
-        "rounded-xl border bg-white p-4 animate-fade-in",
-        className
-      )}
-    >
+    <div className={cn('rounded-xl border bg-white p-4 animate-fade-in', className)}>
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-semibold">{title}</h3>
-        
-        <Select
-          value={localTimeRange}
-          onValueChange={handleTimeRangeChange}
-        >
+
+        <Select value={localTimeRange} onValueChange={handleTimeRangeChange}>
           <SelectTrigger className="w-32 h-8">
             <SelectValue placeholder="Period" />
           </SelectTrigger>
@@ -123,7 +110,7 @@ const SpendingTrendChart = ({
           </SelectContent>
         </Select>
       </div>
-      
+
       <div className="h-[300px] mt-4 chart-appear">
         {isClient && (
           <ResponsiveContainer width="100%" height="100%">
@@ -147,15 +134,15 @@ const SpendingTrendChart = ({
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.2} />
-              <XAxis 
-                dataKey="date" 
+              <XAxis
+                dataKey="date"
                 axisLine={false}
                 tickLine={false}
                 tick={{ fontSize: 12 }}
                 dy={10}
               />
-              <YAxis 
-                tickFormatter={formatYAxis} 
+              <YAxis
+                tickFormatter={formatYAxis}
                 axisLine={false}
                 tickLine={false}
                 tick={{ fontSize: 12 }}

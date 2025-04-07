@@ -1,12 +1,12 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Import translations
-import enTranslations from "../translations/en.json";
-import hiTranslations from "../translations/hi.json";
-import mrTranslations from "../translations/mr.json";
+import enTranslations from '../translations/en.json';
+import hiTranslations from '../translations/hi.json';
+import mrTranslations from '../translations/mr.json';
 
 // Supported languages
-export type Language = "en" | "hi" | "mr";
+export type Language = 'en' | 'hi' | 'mr';
 
 // Translation records
 const translations: Record<Language, Record<string, string>> = {
@@ -23,25 +23,19 @@ type LanguageContextType = {
 };
 
 // Create context
-const LanguageContext = createContext<LanguageContextType | undefined>(
-  undefined
-);
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 // Provider component
-export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Get initial language from localStorage or default to English
   const [language, setLanguage] = useState<Language>(() => {
-    const savedLanguage = localStorage.getItem("language") as Language;
-    return savedLanguage && ["en", "hi", "mr"].includes(savedLanguage)
-      ? savedLanguage
-      : "en";
+    const savedLanguage = localStorage.getItem('language') as Language;
+    return savedLanguage && ['en', 'hi', 'mr'].includes(savedLanguage) ? savedLanguage : 'en';
   });
 
   // Update localStorage when language changes
   useEffect(() => {
-    localStorage.setItem("language", language);
+    localStorage.setItem('language', language);
     document.documentElement.lang = language;
   }, [language]);
 
@@ -60,10 +54,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
         // Replace parameters if provided
         if (params) {
           Object.entries(params).forEach(([paramKey, value]) => {
-            translatedText = translatedText.replace(
-              `{{${paramKey}}}`,
-              String(value)
-            );
+            translatedText = translatedText.replace(`{{${paramKey}}}`, String(value));
           });
         }
 
@@ -71,19 +62,14 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       // Try to find it in English as fallback
-      if (language !== "en" && translations["en"][key]) {
-        console.warn(
-          `Missing translation for key "${key}" in language "${language}"`
-        );
-        let translatedText = translations["en"][key];
+      if (language !== 'en' && translations['en'][key]) {
+        console.warn(`Missing translation for key "${key}" in language "${language}"`);
+        let translatedText = translations['en'][key];
 
         // Replace parameters if provided
         if (params) {
           Object.entries(params).forEach(([paramKey, value]) => {
-            translatedText = translatedText.replace(
-              `{{${paramKey}}}`,
-              String(value)
-            );
+            translatedText = translatedText.replace(`{{${paramKey}}}`, String(value));
           });
         }
 
@@ -94,7 +80,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
       console.warn(`Translation key not found: "${key}"`);
       return key;
     } catch (error) {
-      console.error("Translation error:", error);
+      console.error('Translation error:', error);
       return key;
     }
   };
@@ -110,7 +96,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
 export const useLanguage = () => {
   const context = useContext(LanguageContext);
   if (context === undefined) {
-    throw new Error("useLanguage must be used within a LanguageProvider");
+    throw new Error('useLanguage must be used within a LanguageProvider');
   }
   return context;
 };
