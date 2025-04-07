@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import ExpenseCard, { Expense, ExpenseCategory } from "@/components/ExpenseCard";
 import TransactionList from "@/components/TransactionList";
@@ -27,101 +26,8 @@ import {
   CalendarRange
 } from "lucide-react";
 import { toast } from "sonner";
-import { formatIndianCurrency } from "@/utils/currency";
-
-// Mock data for demonstration
-const mockExpenses: Expense[] = [
-  {
-    id: "1",
-    amount: 45.99,
-    category: "food",
-    date: "2023-06-15",
-    description: "Grocery Shopping",
-    isRecurring: false,
-    paymentMethod: "Credit Card"
-  },
-  {
-    id: "2",
-    amount: 120.00,
-    category: "bills",
-    date: "2023-06-10",
-    description: "Electricity Bill",
-    isRecurring: true,
-    paymentMethod: "Bank Transfer"
-  },
-  {
-    id: "3",
-    amount: 35.50,
-    category: "transport",
-    date: "2023-06-08",
-    description: "Gas Station",
-    isRecurring: false,
-    paymentMethod: "Debit Card"
-  },
-  {
-    id: "4",
-    amount: 89.99,
-    category: "shopping",
-    date: "2023-06-05",
-    description: "New Shoes",
-    isRecurring: false,
-    paymentMethod: "Credit Card"
-  },
-  {
-    id: "5",
-    amount: 12.99,
-    category: "entertainment",
-    date: "2023-06-02",
-    description: "Movie Tickets",
-    isRecurring: false,
-    paymentMethod: "Cash"
-  },
-  {
-    id: "6",
-    amount: 65.00,
-    category: "health",
-    date: "2023-05-28",
-    description: "Doctor's Appointment",
-    isRecurring: false,
-    paymentMethod: "Health Insurance"
-  },
-  {
-    id: "7",
-    amount: 150.00,
-    category: "education",
-    date: "2023-05-25",
-    description: "Online Course",
-    isRecurring: false,
-    paymentMethod: "Credit Card"
-  },
-  {
-    id: "8",
-    amount: 28.99,
-    category: "food",
-    date: "2023-05-20",
-    description: "Pizza Delivery",
-    isRecurring: false,
-    paymentMethod: "Cash"
-  },
-  {
-    id: "9",
-    amount: 200.00,
-    category: "bills",
-    date: "2023-05-15",
-    description: "Internet & Cable",
-    isRecurring: true,
-    paymentMethod: "Bank Transfer"
-  },
-  {
-    id: "10",
-    amount: 55.75,
-    category: "transport",
-    date: "2023-05-12",
-    description: "Uber Rides",
-    isRecurring: false,
-    paymentMethod: "Credit Card"
-  }
-];
+import { formatIndianCurrency, formatInr } from "@/utils/currency";
+import { mockExpenses } from "@/utils/initMockData";
 
 const mockCategoryData = [
   { name: "Food", value: 350, color: "#FF6B6B" },
@@ -134,13 +40,123 @@ const mockCategoryData = [
 ];
 
 const Expenses = () => {
-  const [expenses, setExpenses] = useState<Expense[]>(mockExpenses);
-  const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>(mockExpenses);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]);
   const [categoryData, setCategoryData] = useState(mockCategoryData);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<string>("all");
   const [isFiltersVisible, setIsFiltersVisible] = useState(false);
+
+  // Load expenses from localStorage on mount and when new expenses are added
+  useEffect(() => {
+    const loadExpenses = () => {
+      try {
+        const storedExpenses = localStorage.getItem('expenses');
+        if (storedExpenses) {
+          const parsedExpenses = JSON.parse(storedExpenses);
+          console.log("Loaded expenses from localStorage:", parsedExpenses);
+          
+          // Format dates and other fields for display
+          const formattedExpenses = parsedExpenses.map((exp: any) => ({
+            id: exp.id || uuidv4(),
+            amount: exp.amount,
+            // Ensure category is a valid ExpenseCategory
+            category: (exp.category || 'other') as ExpenseCategory,
+            date: exp.date ? new Date(exp.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            description: exp.description,
+            isRecurring: exp.isRecurring || false,
+            paymentMethod: exp.paymentMethod || 'card'
+          }));
+          
+          // Replace existing expenses with localStorage data
+          setExpenses(formattedExpenses);
+          
+          // Update filtered expenses based on current filters
+          applyFilters(formattedExpenses);
+        } else {
+          // If localStorage is empty, use mock data as fallback
+          // Type cast mockExpenses to Expense[] to satisfy TypeScript
+          setExpenses(mockExpenses as unknown as Expense[]);
+          applyFilters(mockExpenses as unknown as Expense[]);
+        }
+      } catch (error) {
+        console.error('Error loading expenses from localStorage:', error);
+        // Fallback to mock data if localStorage fails
+        setExpenses(mockExpenses as unknown as Expense[]);
+        applyFilters(mockExpenses as unknown as Expense[]);
+      }
+    };
+
+    // Helper function to apply filters
+    const applyFilters = (expensesData: Expense[]) => {
+      let filtered = [...expensesData];
+      
+      // Apply category filter
+      if (categoryFilter !== "all") {
+        filtered = filtered.filter(
+          (exp) => exp.category.toLowerCase() === categoryFilter.toLowerCase()
+        );
+      }
+      
+      // Apply date filter
+      if (dateFilter === "week") {
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        filtered = filtered.filter(
+          (exp) => new Date(exp.date) >= weekAgo
+        );
+      } else if (dateFilter === "month") {
+        const monthAgo = new Date();
+        monthAgo.setMonth(monthAgo.getMonth() - 1);
+        filtered = filtered.filter(
+          (exp) => new Date(exp.date) >= monthAgo
+        );
+      } else if (dateFilter === "year") {
+        const yearAgo = new Date();
+        yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+        filtered = filtered.filter(
+          (exp) => new Date(exp.date) >= yearAgo
+        );
+      }
+      
+      // Apply search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(
+          (exp) =>
+            exp.description.toLowerCase().includes(query) ||
+            exp.category.toLowerCase().includes(query) ||
+            (exp.paymentMethod && exp.paymentMethod.toLowerCase().includes(query))
+        );
+      }
+      
+      setFilteredExpenses(filtered);
+    };
+
+    // Listen for custom event when new expense is added
+    const handleExpenseAdded = (event: any) => {
+      console.log("Expense added event received:", event.detail);
+      // Reload expenses from localStorage
+      loadExpenses();
+      
+      // Show success notification
+      toast.success("Expense added to your list!");
+    };
+
+    // Initial load
+    loadExpenses();
+
+    // Add event listeners to both document and window to ensure we catch the event
+    document.addEventListener('expenseAdded', handleExpenseAdded);
+    window.addEventListener('expenseAdded', handleExpenseAdded);
+    
+    // Clean up event listeners
+    return () => {
+      document.removeEventListener('expenseAdded', handleExpenseAdded);
+      window.removeEventListener('expenseAdded', handleExpenseAdded);
+    };
+  }, [categoryFilter, dateFilter, searchQuery]);
 
   // Handle adding a new expense
   const handleAddExpense = (expense: {
@@ -157,11 +173,39 @@ const Expenses = () => {
       date: expense.date.toISOString().split("T")[0],
     };
     
-    setExpenses([newExpense, ...expenses]);
+    // Add to current state
+    const updatedExpenses = [newExpense, ...expenses];
+    setExpenses(updatedExpenses);
     
-    // Update category data
+    // Also save to localStorage for persistence
+    try {
+      const existingExpensesJson = localStorage.getItem('expenses') || '[]';
+      const existingExpenses = JSON.parse(existingExpensesJson);
+      
+      existingExpenses.push({
+        ...newExpense,
+        createdAt: new Date().toISOString()
+      });
+      
+      localStorage.setItem('expenses', JSON.stringify(existingExpenses));
+      
+      // Dispatch event to notify that expense was added
+      const expenseAddedEvent = new CustomEvent('expenseAdded', { 
+        detail: newExpense,
+        bubbles: true,
+        composed: true
+      });
+      
+      document.dispatchEvent(expenseAddedEvent);
+      window.dispatchEvent(expenseAddedEvent);
+      console.log("Expense added event dispatched from Expenses.tsx:", newExpense);
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+    }
+    
+    // Update category data for pie chart
     const categoryIndex = categoryData.findIndex(
-      (cat) => cat.name.toLowerCase() === expense.category
+      (cat: typeof categoryData[0]) => cat.name.toLowerCase() === expense.category
     );
     
     if (categoryIndex >= 0) {
@@ -170,48 +214,42 @@ const Expenses = () => {
       setCategoryData(newCategoryData);
     }
     
-    toast.success("Expense added successfully!");
+    toast.success(`Expense added: ${formatInr(expense.amount)}`);
   };
 
-  // Apply filters to expenses
+  // Update category data whenever expenses change
   useEffect(() => {
-    let result = expenses;
+    // Create a fresh category data structure
+    const updatedCategoryData = [
+      { name: "Food", value: 0, color: "#FF6B6B" },
+      { name: "Transport", value: 0, color: "#4ECDC4" },
+      { name: "Shopping", value: 0, color: "#FFD166" },
+      { name: "Entertainment", value: 0, color: "#6A0572" },
+      { name: "Bills", value: 0, color: "#1A535C" },
+      { name: "Health", value: 0, color: "#F25F5C" },
+      { name: "Education", value: 0, color: "#247BA0" },
+      { name: "Other", value: 0, color: "#9D8DF1" }
+    ];
     
-    // Apply search filter
-    if (searchQuery) {
-      result = result.filter(expense => 
-        expense.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
+    // Sum up expenses by category
+    expenses.forEach(expense => {
+      const categoryName = expense.category.charAt(0).toUpperCase() + expense.category.slice(1);
+      const categoryIndex = updatedCategoryData.findIndex(cat => cat.name.toLowerCase() === expense.category.toLowerCase());
+      
+      if (categoryIndex >= 0) {
+        updatedCategoryData[categoryIndex].value += expense.amount;
+      } else {
+        // If category not found, add to "Other"
+        const otherIndex = updatedCategoryData.findIndex(cat => cat.name === "Other");
+        if (otherIndex >= 0) {
+          updatedCategoryData[otherIndex].value += expense.amount;
+        }
+      }
+    });
     
-    // Apply category filter
-    if (categoryFilter !== "all") {
-      result = result.filter(expense => expense.category === categoryFilter);
-    }
-    
-    // Apply date filter
-    const today = new Date();
-    const oneWeekAgo = new Date(today);
-    oneWeekAgo.setDate(today.getDate() - 7);
-    const oneMonthAgo = new Date(today);
-    oneMonthAgo.setMonth(today.getMonth() - 1);
-    
-    if (dateFilter === "week") {
-      result = result.filter(expense => {
-        const expenseDate = new Date(expense.date);
-        return expenseDate >= oneWeekAgo;
-      });
-    } else if (dateFilter === "month") {
-      result = result.filter(expense => {
-        const expenseDate = new Date(expense.date);
-        return expenseDate >= oneMonthAgo;
-      });
-    } else if (dateFilter === "recurring") {
-      result = result.filter(expense => expense.isRecurring);
-    }
-    
-    setFilteredExpenses(result);
-  }, [expenses, searchQuery, categoryFilter, dateFilter]);
+    // Update the category data state
+    setCategoryData(updatedCategoryData);
+  }, [expenses]);
 
   // Calculate total amount of filtered expenses
   const totalAmount = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
@@ -266,7 +304,7 @@ const Expenses = () => {
                     <SelectItem value="all">All Time</SelectItem>
                     <SelectItem value="week">Last 7 days</SelectItem>
                     <SelectItem value="month">Last 30 days</SelectItem>
-                    <SelectItem value="recurring">Recurring Only</SelectItem>
+                    <SelectItem value="year">Last 12 months</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -349,7 +387,7 @@ const Expenses = () => {
                           ? "Last 7 days"
                           : dateFilter === "month"
                             ? "Last 30 days"
-                            : "Recurring Only"
+                            : "Last 12 months"
                       }
                     </span>
                   </div>

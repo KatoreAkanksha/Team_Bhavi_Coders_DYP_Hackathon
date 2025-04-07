@@ -16,21 +16,25 @@ const queryClient = new QueryClient({
 
 // Initialize API configuration
 const init = async () => {
-  try {
-    await initializeApi();
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error occurred";
-    console.error("Failed to initialize API:", errorMessage);
-    // We can show a toast notification here if needed
-  }
-
-  // Render app after initialization attempt
+  // Always render the app, regardless of API initialization status
   const root = document.getElementById("root");
   if (!root) {
     throw new Error("Root element not found");
   }
 
+  try {
+    // Initialize API before rendering to ensure config is loaded
+    await initializeApi();
+    console.info("API initialization completed successfully");
+  } catch (error) {
+    // Log the error but continue rendering the app with demo/fallback data
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error occurred";
+    console.error("Failed to initialize API:", errorMessage);
+    console.info("Application will continue with limited functionality");
+  }
+
+  // Render app after initialization attempt (success or failure)
   createRoot(root).render(
     <QueryClientProvider client={queryClient}>
       <App />

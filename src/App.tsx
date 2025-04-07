@@ -14,6 +14,7 @@ import Navbar from "@/components/Navbar";
 import { Suspense, lazy, memo, useCallback } from "react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import InitMockData from "@/components/InitMockData";
 
 // Lazy load pages with preload hints
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
@@ -74,6 +75,8 @@ function App() {
     <ErrorBoundary onError={handleError}>
       <Router>
         <Providers>
+          {/* Initialize mock data - this component doesn't render anything */}
+          <InitMockData />
           <Layout>
             <MainContent />
           </Layout>

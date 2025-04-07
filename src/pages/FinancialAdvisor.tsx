@@ -453,12 +453,51 @@ const FinancialAdvisor: React.FC = () => {
                 <CardContent>
                   <SmartExpenseCapture
                     onSubmit={(data) => {
-                      toast.success(t("Expense added successfully!"));
-                      addNotification({
-                        title: t("New Expense Added"),
-                        message: `${data.description} - $${data.amount}`,
-                        type: "success"
-                      });
+                      // Save expense to localStorage for persistence
+                      try {
+                        const existingExpensesJson = localStorage.getItem('expenses') || '[]';
+                        const existingExpenses = JSON.parse(existingExpensesJson);
+                        
+                        // Format the expense data appropriately
+                        const newExpense = {
+                          id: Date.now().toString(), // Generate a unique ID
+                          amount: data.amount,
+                          category: data.category || 'other',
+                          date: data.date.toISOString().split('T')[0], // Format date as YYYY-MM-DD
+                          description: data.description,
+                          isRecurring: data.isRecurring || false,
+                          paymentMethod: data.paymentMethod || 'card',
+                          createdAt: new Date().toISOString()
+                        };
+                        
+                        // Add to localStorage
+                        existingExpenses.push(newExpense);
+                        localStorage.setItem('expenses', JSON.stringify(existingExpenses));
+                        
+                        // Create and dispatch the expenseAdded event
+                        const expenseAddedEvent = new CustomEvent('expenseAdded', {
+                          detail: newExpense,
+                          bubbles: true,
+                          composed: true
+                        });
+                        
+                        // Dispatch at both document and window levels for better compatibility
+                        document.dispatchEvent(expenseAddedEvent);
+                        window.dispatchEvent(expenseAddedEvent);
+                        
+                        console.log("Expense added and event dispatched from FinancialAdvisor:", newExpense);
+                        
+                        // Show confirmation
+                        toast.success(t("Expense added successfully!"));
+                        addNotification({
+                          title: t("New Expense Added"),
+                          message: `${data.description} - $${data.amount}`,
+                          type: "success"
+                        });
+                      } catch (error) {
+                        console.error("Error saving expense:", error);
+                        toast.error(t("Failed to save expense. Please try again."));
+                      }
                     }}
                   />
                 </CardContent>

@@ -97,16 +97,33 @@ export const validateConfiguration = async (): Promise<void> => {
   // Add basic connectivity test for real API keys
   if (FINNHUB_CONFIG.apiKey) {
     try {
+      // Add timeout to the fetch request to prevent long-running requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
       const response = await fetch(
-        `${FINNHUB_CONFIG.baseUrl}/stock/symbol?exchange=US&token=${FINNHUB_CONFIG.apiKey}`
+        `${FINNHUB_CONFIG.baseUrl}/stock/symbol?exchange=US&token=${FINNHUB_CONFIG.apiKey}`,
+        { signal: controller.signal }
       );
+      
+      clearTimeout(timeoutId);
+      
       if (!response.ok) {
-        throw new Error('Failed to connect to Finnhub API');
+        throw new Error(`API responded with status: ${response.status}`);
       }
     } catch (error) {
-      console.error('Finnhub connectivity test failed:', error);
-      console.warn('Using fallback demo data instead of live API data');
-      // Don't throw an error, just continue with demo data
+      console.warn('Finnhub connectivity test failed:', error);
+      console.info('Switching to demo mode due to connectivity issues');
+      
+      // Fallback to demo mode instead of failing
+      FINNHUB_CONFIG.apiKey = 'demo';
+      
+      // Store the original key to try again later
+      try {
+        localStorage.setItem('original_finnhub_api_key', getFinnhubApiKey());
+      } catch (e) {
+        // Ignore storage errors
+      }
     }
   }
 };
@@ -118,19 +135,30 @@ export const initializeApi = async (retryCount = 0): Promise<void> => {
   if (isInitialized) return;
 
   try {
+    // Try to load API key from storage
     const storedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
     if (storedKey) {
       FINNHUB_CONFIG.apiKey = storedKey;
     }
 
+    // Validate configuration with fallback mechanism
     await validateConfiguration();
     isInitialized = true;
+    
+    console.info('Finnhub API initialized successfully');
   } catch (error) {
+    console.warn('Error initializing API:', error);
+    
     if (retryCount < MAX_RETRIES) {
+      console.info(`Retrying API initialization (${retryCount + 1}/${MAX_RETRIES})...`);
       await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
       return initializeApi(retryCount + 1);
     }
-    throw error;
+    
+    // If all retries fail, initialize with demo mode
+    console.warn('All retries failed. Falling back to demo mode.');
+    FINNHUB_CONFIG.apiKey = 'demo';
+    isInitialized = true;
   }
 };
 

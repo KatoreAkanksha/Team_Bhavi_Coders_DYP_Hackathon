@@ -29,9 +29,13 @@ import {
   Languages,
   Moon,
   LogOut,
+  Database,
+  RefreshCw,
+  Trash2,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { initializeMockExpensesInLocalStorage, addSmartExpenseMockData } from "@/utils/initMockData";
 
 const Settings = () => {
   const { t } = useLanguage();
@@ -64,6 +68,27 @@ const Settings = () => {
 
   const handleSaveAppearance = () => {
     toast.success(t("Appearance settings updated"));
+  };
+  
+  // Data management functions
+  const resetAllData = () => {
+    // Clear localStorage
+    localStorage.removeItem('expenses');
+    localStorage.removeItem('mockDataInitialized');
+    
+    // Show confirmation
+    toast.success("All data has been reset. Refresh the page to see changes.");
+  };
+  
+  const initializeMockData = () => {
+    // Initialize mock data
+    const count = initializeMockExpensesInLocalStorage();
+    
+    // Add smart expenses
+    addSmartExpenseMockData();
+    
+    // Show confirmation
+    toast.success(`${count} mock expenses initialized. Refresh the page to see changes.`);
   };
 
   return (
@@ -108,6 +133,60 @@ const Settings = () => {
                 <Input id="phone" type="tel" placeholder="+91 98765 43210" />
               </div>
               <Button onClick={handleSaveProfile}>{t("Save Changes")}</Button>
+            </CardContent>
+          </Card>
+
+          {/* Add Data Management Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Database className="mr-2 h-5 w-5" />
+                {t("Data Management")}
+              </CardTitle>
+              <CardDescription>
+                {t("Manage your application data")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>{t("Demo Data")}</Label>
+                <p className="text-sm text-muted-foreground">
+                  {t("Initialize or reset demo data for testing")}
+                </p>
+                <div className="flex space-x-2 mt-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={initializeMockData}
+                    className="flex items-center"
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    {t("Initialize Mock Data")}
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    onClick={resetAllData}
+                    className="flex items-center"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    {t("Reset All Data")}
+                  </Button>
+                </div>
+              </div>
+              <Separator />
+              <div className="space-y-2">
+                <Label>{t("Data Export & Import")}</Label>
+                <p className="text-sm text-muted-foreground">
+                  {t("Export your data or import from a file")}
+                </p>
+                <div className="flex space-x-2 mt-2">
+                  <Button variant="outline" disabled>
+                    {t("Export Data")}
+                  </Button>
+                  <Button variant="outline" disabled>
+                    {t("Import Data")}
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
